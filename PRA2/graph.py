@@ -140,11 +140,6 @@ class Graph(object):
             formula.add_clause([-nodes[n1 - 1], -nodes[n2 - 1]], 1)
 
         _, model =solver.solve(formula)
-       
-        new_formula = formula.to_13wpm()
-        _, model1 =solver.solve(new_formula)
-        print(model1)
-        print(model)
         
         return [n for n in model if n > 0]
     

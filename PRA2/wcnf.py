@@ -113,7 +113,6 @@ class WCNFFormula(object):
         return formula13
 
     def calculate_hard_clauses(clause, formula13):
-        
         first_var = formula13.new_var()
         formula13.add_clause(clause[:2] + [first_var])
 
@@ -254,3 +253,4 @@ if __name__ == "__main__":
     else:
         # Wrong number of arguments
         print("Usage: {} <in DIMACS> <out 1-3 wpms DIMACS>".format(sys.argv[0]))
+

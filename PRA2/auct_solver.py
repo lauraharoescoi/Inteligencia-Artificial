@@ -14,13 +14,7 @@ class Bid(object):
         self.cost = int(line[-1])
 
     def toString(self):
-        string = ""
-        string += "agent: " + self.agent + "\n"
-        string += "goods: "
-        for g in self.goods:
-            string += g+" " 
-        string += "\ncost: " + str(self.cost) + "\n"
-        return string
+        return f"{self.agent} {self.goods} cost: {self.cost}"
 
 class AuctionProblem(object):
     """This class represents a combinatorial auction problem. The agents are
@@ -100,12 +94,26 @@ class AuctionProblem(object):
         _, model = solver.solve(formula)
         return [n for n in model if n > 0]
 
+    def print_sol(self, sol):
+        benefit = 0
+        for bid in sol:
+            if bid > 0:
+                print(self.bids[bid-1].toString())
+                benefit += self.bids[bid-1].cost
+
+        if sol == []:
+            print("Insatisfiable")
+        else:
+            print(f"Total benefit: {benefit}")
+            print("Valid solution")
+
+
 def main(argv=None):
     args = parse_command_line_arguments(argv)
     solver = msat_runner.MaxSATRunner(args.solver)
     auction = AuctionProblem(args.auction)
     auction_solved = auction.MaxSatSolve(solver, args.no_min_win_bids)
-    print("APS", " ".join(map(str, auction_solved)))
+    auction.print_sol(auction_solved)
 
 def parse_command_line_arguments(argv=None):
     parser = argparse.ArgumentParser(
