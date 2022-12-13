@@ -1,0 +1,18 @@
+Agents: a1,a2,a3
+Goods: g1,g2,g3,g4
+Bids: [
+    a1: g1 (Price 10),
+    a1: g2 (Price 15),
+    a2: g2 (Price 5),
+    a2: g3 (Price 10),
+    a2: g4 (Price 20),
+    a3: g1 (Price 15),
+    a3: g4 (Price 10),
+]
+
+Benefit: 60
+a1: g2 (Price 15)
+a2: g3 (Price 10)
+a2: g4 (Price 20)
+a3: g1 (Price 15)
+Valid Solution

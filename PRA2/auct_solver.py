@@ -10,7 +10,7 @@ import wcnf
 class Bid(object):
     def __init__(self, line=""):
         self.agent = line[0]
-        self.goods = (g for g in line[1:-1])
+        self.goods = [g for g in line[1:-1]]
         self.cost = int(line[-1])
 
     def toString(self):
@@ -73,20 +73,18 @@ class AuctionProblem(object):
             else:
                 self.bids.append(Bid(l))
 
-    def MaxSatSolve(solver, no_min_win):
+    def MaxSatSolve(self, solver, no_min_win):
         formula = wcnf.WCNFFormula()
 
-
         nodes = [formula.new_var() for _ in self.bids]
-        i = 0
-        for bid in self.bids:
+        for i, bid in enumerate(self.bids):
             formula.add_clause([nodes[i]], bid.cost)
-            i+=1
-        for b1 in range(len(self.bids), -1):
-            for b2 in range(b2, len(self.bids)):
+
+        for b1 in range(len(self.bids) -1):
+            for b2 in range(b1 + 1, len(self.bids)):
                 intersection = [value for value in self.bids[b1].goods if value in self.bids[b2].goods]
-                if intersection == []:
-                    formula.add_clause([-nodes[b1], -nodes[b1]])
+                if intersection != []:
+                    formula.add_clause([-nodes[b1], -nodes[b2]])
         
         if no_min_win:
             _, model = solver.solve(formula)
@@ -106,9 +104,8 @@ def main(argv=None):
     args = parse_command_line_arguments(argv)
     solver = msat_runner.MaxSATRunner(args.solver)
     auction = AuctionProblem(args.auction)
-    print(auction.bids[2].toString())
-    auction_solved = AuctionProblem.MaxSatSolve(solver, args.no_min_win_bids)
-    print("MVC", " ".join(map(str, auction_solved)))
+    auction_solved = auction.MaxSatSolve(solver, args.no_min_win_bids)
+    print("APS", " ".join(map(str, auction_solved)))
 
 def parse_command_line_arguments(argv=None):
     parser = argparse.ArgumentParser(
