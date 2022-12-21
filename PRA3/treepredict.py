@@ -42,11 +42,11 @@ def unique_counts(part: Data):
     """
     return dict(collections.Counter(row[-1] for row in part))
 
-    results = collections.Counter()
-    for row in part:
-        c = row[-1]
-        results[c] += 1
-    return dict(results)
+    # results = collections.Counter()
+    # for row in part:
+    #     c = row[-1]
+    #     results[c] += 1
+    # return dict(results)
 
 
 def gini_impurity(part: Data):
@@ -82,7 +82,7 @@ def _split_numeric(prototype: List, column: int, value):
 
 
 def _split_categorical(prototype: List, column: int, value: str):
-    raise NotImplementedError
+    return prototype[column] == value
 
 
 def divideset(part: Data, column: int, value) -> Tuple[Data, Data]:
@@ -90,11 +90,19 @@ def divideset(part: Data, column: int, value) -> Tuple[Data, Data]:
     t7: Divide a set on a specific column. Can handle
     numeric or categorical values
     """
+    set1 = []
+    set2 = []
     if isinstance(value, (int, float)):
         split_function = _split_numeric
     else:
         split_function = _split_categorical
-    #...
+    
+    for row in part:
+        if split_function(row, column, value):
+            set1.append(row)
+        else:
+            set2.append(row)
+
     return (set1, set2)
 
 
@@ -111,7 +119,11 @@ class DecisionNode:
         - results is a dictionary that stores the result
           for this branch. Is None except for the leaves
         """
-        raise NotImplementedError
+        self.col = col
+        self.value = value
+        self.tb = tb
+        self.fb = fb
+        self.results = results
 
 
 def buildtree(part: Data, scoref=entropy, beta=0):
@@ -204,9 +216,11 @@ def main():
     # print(entropy([]))
     # print(entropy([data[0]]))
 
-    part_T, part_F = divideset(data, column=2, value="yes")
-    print_data(header, part_T)
-    print_data(header, part_F)
+    # print_data(header, data)
+
+    # part_T, part_F = divideset(data, column=2, value="yes")
+    # print_data(header, part_T)
+    # print_data(header, part_F)
 
     headers, data = read(filename)
     tree = buildtree(data)
