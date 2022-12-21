@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import sys
+import collections
 from math import log2
 from typing import List, Tuple
 
 # Used for typing
 Data = List[List]
+
 
 def read(file_name: str, separator: str = ",") -> Tuple[List[str], Data]:
     """
@@ -13,22 +15,32 @@ def read(file_name: str, separator: str = ",") -> Tuple[List[str], Data]:
     """
     header = None
     data = []
-    with open(file_name, "r") as fh: 
+    with open(file_name, "r") as fh:
         for line in fh:
-            values = line.strip().split(sep=separator)
+            values = line.strip().split(separator)
             if header is None:
                 header = values
                 continue
             data.append([_parse_value(v) for v in values])
     return header, data
-                
-def _parse_value(v):
+
+
+def _parse_value(v: str):
     try:
         if float(v) == int(v):
             return int(v)
-        return float(v)
+        else:
+            return float(v)
     except ValueError:
         return v
+    # try:
+    #     return float(v)
+    # except ValueError:
+    #     try:
+    #         return int(v)
+    #     except ValueError:
+    #         return v
+
 
 def unique_counts(part: Data):
     """
@@ -36,14 +48,21 @@ def unique_counts(part: Data):
     (the last column of each row is the
     result)
     """
-    results = {}
-    for row in part:    
-        r = row[-1]
-        if r not in results:
-            results[r] = 0
-        results[r] += 1
+    return dict(collections.Counter(row[-1] for row in part))
 
-    return results
+    # results = collections.Counter()
+    # for row in part:
+    #     c = row[-1]
+    #     results[c] += 1
+    # return dict(results)
+
+    # results = {}
+    # for row in part:
+    #     c = row[-1]
+    #     if c not in results:
+    #         results[c] = 0
+    #     results[c] += 1
+    # return results
 
 
 def gini_impurity(part: Data):
@@ -58,26 +77,28 @@ def gini_impurity(part: Data):
     imp = 1
     for v in results.values():
         imp -= (v / total) ** 2
-
     return imp
 
 
-def entropy(rows: Data):
+def entropy(part: Data):
     """
     t6: Entropy is the sum of p(x)log(p(x))
     across all the different possible results
     """
-    total = len(rows)
-    if total == 0:
-        return 0
+    total = len(part)
+    results = unique_counts(part)
 
-    results = unique_counts(rows)
     probs = (v / total for v in results.values())
     return -sum(p * log2(p) for p in probs)
 
+    # imp = 0
+    # for v in results.values():
+    #     p = v / total
+    #     imp -= p * log2(p)
+    # return imp
 
 
-def _split_numeric(prototype: List, column: int, value: int):
+def _split_numeric(prototype: List, column: int, value):
     return prototype[column] >= value
 
 
@@ -85,7 +106,7 @@ def _split_categorical(prototype: List, column: int, value: str):
     raise NotImplementedError
 
 
-def divideset(part: Data, column: int, value: int) -> Tuple[Data, Data]:
+def divideset(part: Data, column: int, value) -> Tuple[Data, Data]:
     """
     t7: Divide a set on a specific column. Can handle
     numeric or categorical values
@@ -141,6 +162,10 @@ def iterative_buildtree(part: Data, scoref=entropy, beta=0):
     raise NotImplementedError
 
 
+def classify(tree, values):
+    raise NotImplementedError
+
+
 def print_tree(tree, headers=None, indent=""):
     """
     t11: Include the following function
@@ -180,26 +205,29 @@ def print_data(headers, data):
         print("")
     print('-' * ((colsize + 1) * len(headers) + 1))
 
+
 def main():
     try:
         filename = sys.argv[1]
     except IndexError:
         filename = "decision_tree_example.txt"
-    
-    header, data = read(filename)
-    print_data(header, data)
-    print(unique_counts(data))
-    print(gini_impurity(data))
-    print(gini_impurity([]))
-    print(gini_impurity([data[0]]))
 
-    print(entropy(data))
-    print(entropy([]))
-    print(entropy([data[0]]))
+    # header, data = read(filename)
+    # print_data(header, data)
 
-    part_T, part_F = divideset(data, column=2, value="yes")
-    print_data(header, part_T)
-    print_data(header, part_F)
+    # print(unique_counts(data))
+
+    # print(gini_impurity(data))
+    # print(gini_impurity([]))
+    # print(gini_impurity([data[0]]))
+
+    # print(entropy(data))
+    # print(entropy([]))
+    # print(entropy([data[0]]))
+
+    headers, data = read(filename)
+    tree = buildtree(data)
+    print_tree(tree, headers)
 
 
 if __name__ == "__main__":
