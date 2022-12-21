@@ -29,17 +29,9 @@ def _parse_value(v: str):
     try:
         if float(v) == int(v):
             return int(v)
-        else:
-            return float(v)
+        return float(v)
     except ValueError:
         return v
-    # try:
-    #     return float(v)
-    # except ValueError:
-    #     try:
-    #         return int(v)
-    #     except ValueError:
-    #         return v
 
 
 def unique_counts(part: Data):
@@ -50,19 +42,11 @@ def unique_counts(part: Data):
     """
     return dict(collections.Counter(row[-1] for row in part))
 
-    # results = collections.Counter()
-    # for row in part:
-    #     c = row[-1]
-    #     results[c] += 1
-    # return dict(results)
-
-    # results = {}
-    # for row in part:
-    #     c = row[-1]
-    #     if c not in results:
-    #         results[c] = 0
-    #     results[c] += 1
-    # return results
+    results = collections.Counter()
+    for row in part:
+        c = row[-1]
+        results[c] += 1
+    return dict(results)
 
 
 def gini_impurity(part: Data):
@@ -91,11 +75,6 @@ def entropy(part: Data):
     probs = (v / total for v in results.values())
     return -sum(p * log2(p) for p in probs)
 
-    # imp = 0
-    # for v in results.values():
-    #     p = v / total
-    #     imp -= p * log2(p)
-    # return imp
 
 
 def _split_numeric(prototype: List, column: int, value):
@@ -212,7 +191,7 @@ def main():
     except IndexError:
         filename = "decision_tree_example.txt"
 
-    # header, data = read(filename)
+    header, data = read(filename)
     # print_data(header, data)
 
     # print(unique_counts(data))
@@ -224,6 +203,10 @@ def main():
     # print(entropy(data))
     # print(entropy([]))
     # print(entropy([data[0]]))
+
+    part_T, part_F = divideset(data, column=2, value="yes")
+    print_data(header, part_T)
+    print_data(header, part_F)
 
     headers, data = read(filename)
     tree = buildtree(data)
