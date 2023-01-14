@@ -107,7 +107,7 @@ def divideset(part: Data, column: int, value) -> Tuple[Data, Data]:
 
 
 class DecisionNode:
-    def __init__(self, col=-1, value=None, results=None, tb=None, fb=None):
+    def __init__(self, col=-1, value=None, results=None, tb=None, fb=None, gain=1):
         """
         t8: We have 5 member variables:
         - col is the column index which represents the
@@ -124,6 +124,7 @@ class DecisionNode:
         self.tb = tb
         self.fb = fb
         self.results = results
+        self.gain = gain
 
 
 def buildtree(part: Data, scoref=entropy, beta=0):
@@ -141,21 +142,99 @@ def buildtree(part: Data, scoref=entropy, beta=0):
     best_gain = 0
     best_criteria = None
     best_sets = None
-    # ...
-    #else:
-    #    return DecisionNode(results=unique_counts(part))
+    
+    for col in range(len(part[0]) - 1):
+        # Generate the list of possible different values in the current column
+        global_values = set([row[col] for row in part])
+        for value in global_values:
+            # Divide the dataset into two subdatasets
+            (set1, set2) = divideset(part, col, value)
+            # Calculate the impurity measure for the current split
+            p = float(len(set1)) / len(part)
+            gain = current_score - p * scoref(set1) - (1 - p) * scoref(set2)
+            # Update the best criteria if the current split is better
+            if gain > best_gain and len(set1) > 0 and len(set2) > 0:
+                best_gain = gain
+                best_criteria = (col, value)
+                best_sets = (set1, set2)
+    # Create the subnodes
+    if best_gain > beta:
+        trueBranch = buildtree(best_sets[0], scoref, beta)
+        falseBranch = buildtree(best_sets[1], scoref, beta)
+        return DecisionNode(col=best_criteria[0], value=best_criteria[1],
+                            tb=trueBranch, fb=falseBranch, gain=best_gain)
+    else:
+        return DecisionNode(results=unique_counts(part))
 
 
 def iterative_buildtree(part: Data, scoref=entropy, beta=0):
     """
     t10: Define the iterative version of the function buildtree
     """
-    raise NotImplementedError
+    root = DecisionNode()
+    queue = [(root, part)]
+
+    while len(queue) > 0:
+        current_node, current_part = queue.pop(0)
+        if len(current_part) == 0:
+            continue
+        current_score = scoref(current_part)
+        best_gain = 0
+        best_criteria = None
+        best_sets = None
+        for col in range(len(current_part[0])):
+            global_values = set([row[col] for row in current_part])
+            for value in global_values:
+                (set1, set2) = divideset(current_part, col, value)
+                p = float(len(set1)) / len(current_part)
+                gain = current_score - p * scoref(set1) - (1 - p) * scoref(set2)
+                if gain > best_gain and len(set1) > 0 and len(set2) > 0:
+                    best_gain = gain
+                    best_criteria = (col, value)
+                    best_sets = (set1, set2)
+        if best_gain > beta:
+            current_node.col = best_criteria[0]
+            current_node.value = best_criteria[1]
+            current_node.gain = best_gain
+            current_node.tb = DecisionNode()
+            current_node.fb = DecisionNode()
+            queue.append((current_node.tb, best_sets[0]))
+            queue.append((current_node.fb, best_sets[1]))
+        else:
+            current_node.results = unique_counts(current_part)
+    return root
 
 
 def classify(tree, values):
-    raise NotImplementedError
+    if tree.results is not None:
+        return list(tree.results.keys())[0]
+    else:
+        
+        if isinstance(values[tree.col], (int, float)):
+            split_function = _split_numeric
+        else:
+            split_function = _split_categorical
 
+        if split_function(values, tree.col, tree.value):
+            return classify(tree.tb, values)
+        else:
+            return classify(tree.fb, values)
+
+    
+def prune(tree: DecisionNode, threshold: float) :
+    if tree.col == -1:
+        return DecisionNode(results=tree.results)
+
+    tree_false = prune(tree.fb, threshold)
+    tree_true = prune(tree.tb, threshold)
+    
+    if tree_true.results is not None and tree_false.results is not None:
+        if tree.gain < threshold:
+            new_result = tree_true.results.copy()
+            new_result.update(tree_false.results)
+            return DecisionNode(results = new_result)
+    return DecisionNode(col=tree.col, value=tree.value, tb=tree_true, fb=tree_false, gain=tree.gain)
+    
 
 def print_tree(tree, headers=None, indent=""):
     """
@@ -222,9 +301,16 @@ def main():
     # print_data(header, part_T)
     # print_data(header, part_F)
 
-    headers, data = read(filename)
-    tree = buildtree(data)
-    print_tree(tree, headers)
+    # headers, data = read(filename)
+    tree = buildtree(data, gini_impurity, 0.11)
+    print_tree(tree, header)
+    # result = classify(tree, data[1])
+    # print(result)
+    # print_data(header, [data[1]])
+
+    # print("\n------------------------------------------\n")
+    # new_tree = prune(tree, 0.4)
+    # print_tree(new_tree, header)
 
 
 if __name__ == "__main__":
