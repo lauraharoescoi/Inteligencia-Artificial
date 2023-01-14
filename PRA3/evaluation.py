@@ -49,9 +49,7 @@ def divide_folds(dataset, k, seed):
     choices = list(range(n_rows))
     random.shuffle(choices)
     for fold in range(k):
-        fold_size= (n_rows-assigned)//(k-fold)
-        assigned += fold_size
-        folds_index.append(choices[assigned-fold_size: assigned])
+        folds_index.append([i for i in choices[fold::k]])
     folds = []
     for fold in range(k):
         folds.append([row for (i, row) in enumerate(dataset) if i in folds_index[fold]])
