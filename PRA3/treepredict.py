@@ -184,7 +184,8 @@ def iterative_buildtree(part: Data, scoref=entropy, beta=0):
         best_criteria = None
         best_sets = None
         for col in range(len(current_part[0])):
-            global_values = set([row[col] for row in current_part])
+            global_values = list(set([row[col] for row in part]))
+            global_values.sort(reverse=True)
             for value in global_values:
                 (set1, set2) = divideset(current_part, col, value)
                 p = float(len(set1)) / len(current_part)
