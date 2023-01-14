@@ -145,7 +145,7 @@ def buildtree(part: Data, scoref=entropy, beta=0):
     
     for col in range(len(part[0]) - 1):
         # Generate the list of possible different values in the current column
-        global_values = set([row[col] for row in part])
+        global_values = ([row[col] for row in part])
         for value in global_values:
             # Divide the dataset into two subdatasets
             (set1, set2) = divideset(part, col, value)
