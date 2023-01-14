@@ -112,7 +112,7 @@ def printclust(clust: BiCluster, labels=None, n=0):
 
 # ......... K-MEANS ..........
 def kcluster(rows, distance=euclidean, k=4, execution=3):
-    best_config = (None, float)
+    best_config = (None, float(10000000000000000000000000000))
     for _ in range(execution):
         # Determine the minimum and maximum values for each point
         ranges = [(min([row[i] for row in rows]), max([row[i] for row in rows])) for i in range(len(rows[0]))]
@@ -159,3 +159,9 @@ def kcluster(rows, distance=euclidean, k=4, execution=3):
     return best_config
 
 
+def values_of_k():
+    row_names, headers, data = readfile("blogdata_full.txt")
+    for i in range(1,6):
+        clusters, sum_distances = kcluster(data, distance=euclidean, k=i, execution=3)
+        print(sum_distances)
+values_of_k()
