@@ -94,3 +94,4 @@ def test_threshold(beta):
         print(f"{threshold} : {current_acc}")
 
 test_threshold(0)
+

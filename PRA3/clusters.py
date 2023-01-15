@@ -1,6 +1,7 @@
 from typing import Tuple, List
 from math import sqrt
 import random
+import matplotlib.pyplot as plt
 
 
 def readfile(filename: str) -> Tuple[List, List, List]:
@@ -111,8 +112,8 @@ def printclust(clust: BiCluster, labels=None, n=0):
 
 
 # ......... K-MEANS ..........
-def kcluster(rows, distance=euclidean, k=4, execution=3):
-    best_config = (None, float(10000000000000000000000000000))
+def kcluster(rows, distance=euclidean_squared, k=int, execution=int):
+    best_config = (None, float(1000000000000000000))
     for _ in range(execution):
         # Determine the minimum and maximum values for each point
         ranges = [(min([row[i] for row in rows]), max([row[i] for row in rows])) for i in range(len(rows[0]))]
@@ -161,7 +162,16 @@ def kcluster(rows, distance=euclidean, k=4, execution=3):
 
 def values_of_k():
     row_names, headers, data = readfile("blogdata_full.txt")
-    for i in range(1,6):
-        clusters, sum_distances = kcluster(data, distance=euclidean, k=i, execution=3)
-        print(sum_distances)
+    k=input("Max number of k: ")
+    k_values = []
+    sum_distances = []
+    for i in range(1, int(k)+1):
+        _, dist = kcluster(data, distance=euclidean_squared, k=i, execution=5)
+        k_values.append(i)
+        sum_distances.append(dist)
+        print(k_values[i-1], sum_distances[i-1])
+    plt.plot(k_values, sum_distances)
+    plt.xlabel("Number of clusters (k)")
+    plt.ylabel("Sum of distances")
+    plt.show()
 values_of_k()
