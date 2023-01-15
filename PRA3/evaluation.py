@@ -1,7 +1,9 @@
 import random
 from typing import Union, List
 import treepredict
+import clusters
 import sys
+import matplotlib.pyplot as plt
 
 header=[]
 best_thresholds=[0.27,0.29,0.3,0.31,0.32,0.33]
@@ -80,6 +82,7 @@ def cross_validation(dataset, k, agg, seed, scoref, beta, threshold):
 
 
 def test_threshold(beta):
+    print("\n------- Pruning --------\n")
     try:
         filename = sys.argv[1]
     except IndexError:
@@ -95,3 +98,22 @@ def test_threshold(beta):
 
 test_threshold(0)
 
+def values_of_k():
+    row_names, headers, data = clusters.readfile("blogdata_full.txt")
+    print("\n------- Elbow method --------\n")
+    k=input("Max number of k: ")
+    k_values = []
+    sum_distances = []
+    for i in range(1, int(k)+1):
+        _, dist = clusters.kcluster(data, distance=clusters.euclidean_squared, k=i, execution=30)
+        k_values.append(i)
+        sum_distances.append(dist)
+        print(k_values[i-1], sum_distances[i-1])
+
+    plt.title("Elbow method")
+    plt.plot(k_values, sum_distances)
+    plt.xlabel("Number of clusters (k)")
+    plt.ylabel("Sum of distances")
+    plt.show()
+
+values_of_k()

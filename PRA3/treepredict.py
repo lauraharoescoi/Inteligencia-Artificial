@@ -304,8 +304,8 @@ def main():
     # print_data(header, part_F)
 
     # headers, data = read(filename)
-    tree = buildtree(data, gini_impurity, 0.11)
-    print_tree(tree, header)
+    # tree = buildtree(data, gini_impurity, 0.11)
+    # print_tree(tree, header)
     # result = classify(tree, data[1])
     # print(result)
     # print_data(header, [data[1]])
